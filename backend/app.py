@@ -83,6 +83,11 @@ def ask_question():
 
     return jsonify({'answer': answer})
 
+# Root route for Render or health check
+@app.route('/', methods=['GET'])
+def index():
+    return jsonify({"message": "AI PDF Chatbot backend is live 🚀"}), 200
+
 # Run app
 if __name__ == '__main__':
-    app.run(host="0.0.0.0.", port=8000)
+    app.run(host="0.0.0.0", port=8000)
