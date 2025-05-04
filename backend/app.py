@@ -13,7 +13,7 @@ load_dotenv()
 
 # Initialize Flask app
 app = Flask(__name__)
-CORS(app, origins=["https://ai-pdf-chatbot-clean-r90pui82b-avdhuts-projects.vercel.app/"])
+CORS(app, origins=["https://ai-pdf-chatbot-clean-r90pui82b-avdhuts-projects.vercel.app"])
 
 # Set upload folder
 UPLOAD_FOLDER = 'uploads'
