@@ -6,7 +6,7 @@ function App() {
   const [question, setQuestion] = useState('');
   const [answer, setAnswer] = useState('');
 
-  const BACKEND_URL = "https://ai-pdf-chatbot-clean-api.onrender.com";
+  const BACKEND_URL = "https://ai-pdf-chatbot-clean-api.onrender.com"; // no trailing slash
 
   const handleFileChange = (e) => {
     setPdfFile(e.target.files[0]);
@@ -28,9 +28,11 @@ function App() {
       });
 
       const data = await res.json();
-      alert(data.message);
+      console.log("Upload Response:", data);
+      alert(data.message || data.error);
     } catch (error) {
       console.error('Upload failed:', error);
+      alert("Something went wrong. Check console.");
     }
   };
 
@@ -48,9 +50,10 @@ function App() {
       });
 
       const data = await res.json();
-      setAnswer(data.answer);
+      setAnswer(data.answer || data.error);
     } catch (error) {
       console.error('Error asking question:', error);
+      alert("Something went wrong. Check console.");
     }
   };
 
