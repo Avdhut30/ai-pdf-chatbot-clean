@@ -6,6 +6,8 @@ function App() {
   const [question, setQuestion] = useState('');
   const [answer, setAnswer] = useState('');
 
+  const BACKEND_URL = "https://ai-pdf-chatbot-clean-api.onrender.com";
+
   const handleFileChange = (e) => {
     setPdfFile(e.target.files[0]);
   };
@@ -20,7 +22,7 @@ function App() {
     formData.append('file', pdfFile);
 
     try {
-      const res = await fetch('http://localhost:5000/upload', {
+      const res = await fetch(`${BACKEND_URL}/upload`, {
         method: 'POST',
         body: formData
       });
@@ -39,7 +41,7 @@ function App() {
     }
 
     try {
-      const res = await fetch('http://localhost:5000/ask', {
+      const res = await fetch(`${BACKEND_URL}/ask`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ question })
