@@ -5,11 +5,15 @@ function App() {
   const [pdfFile, setPdfFile] = useState(null);
   const [question, setQuestion] = useState('');
   const [answer, setAnswer] = useState('');
+  const [status, setStatus] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const BACKEND_URL = "https://ai-pdf-chatbot-clean-api.onrender.com"; // no trailing slash
+  const BACKEND_URL = "https://ai-pdf-chatbot-clean-api.onrender.com"; // ✅ no trailing slash
 
   const handleFileChange = (e) => {
     setPdfFile(e.target.files[0]);
+    setStatus('');
+    setAnswer('');
   };
 
   const handleUpload = async () => {
@@ -17,6 +21,9 @@ function App() {
       alert("Please select a PDF first.");
       return;
     }
+
+    setLoading(true);
+    setStatus("Uploading PDF...");
 
     const formData = new FormData();
     formData.append('file', pdfFile);
@@ -29,10 +36,17 @@ function App() {
 
       const data = await res.json();
       console.log("Upload Response:", data);
-      alert(data.message || data.error);
+
+      if (res.ok) {
+        setStatus("✅ PDF uploaded and vectorized successfully!");
+      } else {
+        setStatus(`❌ Upload error: ${data.error}`);
+      }
     } catch (error) {
       console.error('Upload failed:', error);
-      alert("Something went wrong. Check console.");
+      setStatus("❌ Upload failed. Check browser console.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -42,6 +56,9 @@ function App() {
       return;
     }
 
+    setLoading(true);
+    setStatus("Thinking...");
+
     try {
       const res = await fetch(`${BACKEND_URL}/ask`, {
         method: 'POST',
@@ -50,10 +67,20 @@ function App() {
       });
 
       const data = await res.json();
-      setAnswer(data.answer || data.error);
+      console.log("Answer Response:", data);
+
+      if (res.ok) {
+        setAnswer(data.answer);
+        setStatus("✅ Answer received.");
+      } else {
+        setAnswer('');
+        setStatus(`❌ Error: ${data.error}`);
+      }
     } catch (error) {
       console.error('Error asking question:', error);
-      alert("Something went wrong. Check console.");
+      setStatus("❌ Failed to get answer. Check console.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -74,8 +101,9 @@ function App() {
           <button
             onClick={handleUpload}
             className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 rounded-lg shadow-md"
+            disabled={loading}
           >
-            📤 Upload PDF
+            {loading ? "Uploading..." : "📤 Upload PDF"}
           </button>
 
           {pdfFile && (
@@ -91,18 +119,24 @@ function App() {
               value={question}
               onChange={(e) => setQuestion(e.target.value)}
               className="flex-1 px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-300"
+              disabled={loading}
             />
             <button
               onClick={handleAsk}
               className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-semibold shadow-md"
+              disabled={loading}
             >
-              💬 Ask Question
+              {loading ? "Thinking..." : "💬 Ask Question"}
             </button>
           </div>
+
+          {status && (
+            <p className="text-sm text-center font-medium text-gray-800">{status}</p>
+          )}
         </div>
 
         {answer && (
-          <div className="answer-box">
+          <div className="answer-box mt-6">
             <h3 className="text-xl font-semibold text-indigo-700 mb-2 text-center">
               🧠 AI Answer
             </h3>

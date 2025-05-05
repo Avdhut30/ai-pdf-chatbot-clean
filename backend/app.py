@@ -13,57 +13,61 @@ load_dotenv()
 
 # Initialize Flask app
 app = Flask(__name__)
-CORS(app, origins=["https://ai-pdf-chatbot-clean-r90pui82b-avdhuts-projects.vercel.app"])
+CORS(app, origins=["https://ai-pdf-chatbot-clean-r90pui82b-avdhuts-projects.vercel.app", "*"])  # Added wildcard for dev safety
 
 # Set upload folder
 UPLOAD_FOLDER = 'uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-# Create uploads folder if it doesn't exist
+# Ensure the uploads folder exists (important for Render)
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
+    print(f"Created upload directory at: {UPLOAD_FOLDER}")
 
-# Global variable for vector database
+# Global vector database instance
 vectordb = None
 
 # Upload PDF route
 @app.route('/upload', methods=['POST'])
 def upload_file():
     global vectordb
+    print("🔁 /upload endpoint called")
 
     if 'file' not in request.files:
+        print("🚫 No file uploaded")
         return jsonify({'error': 'No file uploaded'}), 400
 
     file = request.files['file']
     filename = secure_filename(file.filename)
     filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
     file.save(filepath)
-
-    # Load and split PDF safely
-    loader = PyMuPDFLoader(filepath)
+    print(f"📁 File saved to: {filepath}")
 
     try:
+        loader = PyMuPDFLoader(filepath)
         pages = loader.load_and_split()
-        # Filter out empty pages
         pages = [page for page in pages if page.page_content.strip() != ""]
         if not pages:
             return jsonify({'error': 'PDF contains no readable text.'}), 400
     except Exception as e:
+        print(f"❌ Error processing PDF: {e}")
         return jsonify({'error': f'Failed to process PDF: {str(e)}'}), 500
 
-    # Create embeddings
     try:
         embeddings = OpenAIEmbeddings(openai_api_key=os.getenv("OPENAI_API_KEY"))
         vectordb = Chroma.from_documents(pages, embedding=embeddings)
     except Exception as e:
+        print(f"❌ Error generating embeddings: {e}")
         return jsonify({'error': f'Failed to create embeddings: {str(e)}'}), 500
 
+    print("✅ PDF processed and vectorized successfully")
     return jsonify({'message': 'File uploaded and vectorized successfully!'})
 
 # Ask Question route
 @app.route('/ask', methods=['POST'])
 def ask_question():
     global vectordb
+    print("🧠 /ask endpoint called")
 
     if not vectordb:
         return jsonify({'error': 'No PDF uploaded yet.'}), 400
@@ -78,16 +82,18 @@ def ask_question():
         llm = ChatOpenAI(openai_api_key=os.getenv("OPENAI_API_KEY"))
         qa = RetrievalQA.from_chain_type(llm=llm, retriever=vectordb.as_retriever())
         answer = qa.invoke({"query": question})["result"]
+        print(f"📨 Answered: {answer}")
     except Exception as e:
+        print(f"❌ Error generating answer: {e}")
         return jsonify({'error': f'Failed to generate answer: {str(e)}'}), 500
 
     return jsonify({'answer': answer})
 
-# Root route for Render or health check
+# Health check
 @app.route('/', methods=['GET'])
 def index():
     return jsonify({"message": "AI PDF Chatbot backend is live 🚀"}), 200
 
-# Run app
+# Run the server
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=8000)
