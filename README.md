@@ -2,6 +2,11 @@
 
 AI-powered PDF assistant that lets you upload a PDF and ask questions based on its content. Built using **React.js** for the frontend, **Flask + Langchain + OpenAI API** for the backend.
 
+
+
+![AI PDF Chatbot Header](./assets/header.png)
+
+
 ## 🚀 Live Demo
 
 - **Frontend**: [AI PDF Chatbot UI on Vercel](https://ai-pdf-chatbot-clean-r90pui82b-avdhuts-projects.vercel.app/)
