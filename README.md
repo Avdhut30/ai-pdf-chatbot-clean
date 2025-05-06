@@ -9,7 +9,7 @@ AI-powered PDF assistant that lets you upload a PDF and ask questions based on i
 
 ## 🚀 Live Demo
 
-- **Frontend**: [AI PDF Chatbot UI on Vercel](https://ai-pdf-chatbot-clean-r90pui82b-avdhuts-projects.vercel.app/)
+- **Frontend**: [AI PDF Chatbot UI on Vercel](https://ai-pdf-chatbot-clean-felz3rh1v-avdhuts-projects.vercel.app/)
 - **Backend**: [AI PDF API on Render](https://ai-pdf-chatbot-clean-api.onrender.com/)
 
 ## ⚙️ Features
